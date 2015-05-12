@@ -142,7 +142,7 @@ class GoogleCharts
 		arrayPush i_data, row
 	end sub
 	
-	public sub ClearData()
+	public sub ClearColumns()
 		dim col
 		
 		for each col in i_columns
@@ -150,12 +150,16 @@ class GoogleCharts
 		next
 	
 		redim i_columns(-1)
+	end sub
+	
+	public sub ClearData()
 		redim i_data(-1)
 	end sub
 	
 	public sub LoadRecordset(byref rs)
 		if TypeName(rs) <> "Recordset" then err.raise 3, TypeName(me), "Invalid object type. Accepted type is ADODB.Recordset"
 	
+		ClearColumns()
 		ClearData()
 		
 		dim field, row
@@ -198,6 +202,27 @@ class GoogleCharts
 		end select
 	end function
 	
+	
+	public sub LoadArray(byref arr)
+		if TypeName(arr) <> "Variant()" then err.raise 4, TypeName(me), "Invalid object type. Accepted type is Array() - Variant"
+		
+		if arrayDimensions(arr) <> 2 then err.raise 5, TypeName(me), "Invalid Array Size. Array must be bidimensional"
+		
+		ClearData()
+		
+		dim r, c, row
+		
+		for r = 0 to ubound(arr, 2)
+			redim row(-1)
+			
+			for c = 0 to ubound(arr, 1)
+				arrayPush row, arr(c, r)
+			next
+			
+			AddRow row
+		next
+	end sub
+	
 	' Pushes (adds) a value to an array, expanding it
 	private function arrayPush(byref arr, byref value)
 		redim preserve arr(ubound(arr) + 1)
@@ -211,6 +236,18 @@ class GoogleCharts
 		ArrayPush = arr
 	end function
 	
+	private function arrayDimensions(byref arr)
+		dim dimensions
+		dimensions = 0
+		
+		on error resume next
+		while err.number = 0
+			dimensions = ubound(arr, dimensions + 1) + 1
+		wend
+		on error goto 0
+		
+		arrayDimensions = dimensions - 1
+	end function
 	
 	public sub Draw()
 		dim curLCID

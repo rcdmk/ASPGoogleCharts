@@ -26,7 +26,7 @@
 	
 	chart.draw
 	%>
-	<h2>Data from ADO Recordset</h2>
+	<h2>Data from bidimensional array</h2>
 	<!--
 	   METADATA    
 	   TYPE="TypeLib"    
@@ -68,13 +68,20 @@
 	rs("Qty") = 4
 	rs("Price") = 2.25
 	rs.Update
-	 
+	
+	rs.moveFirst
+	
 	chart.id = 2 ' change id to draw a new chart with the same object
-	chart.loadRecordSet rs
-	
-	set rs = nothing
-	
+	chart.loadArray rs.getRows()
 	chart.draw
+	%>
+	<h2>Data from ADO Recordset</h2>
+	<%
+	chart.id = 3 ' change id to draw a new chart with the same object
+	chart.loadRecordSet rs
+	chart.draw	
+	
+	set rs = nothing	
 	%>
 </body>
 </html>

@@ -51,6 +51,14 @@ class GoogleCharts
 		end select		
 	end property
 	
+	public property get ID()
+		ID = i_id
+	end property
+	
+	public property let ID(byval value)
+		i_id = value
+	end property
+	
 	public property get Title()
 		Title = i_title
 	end property
@@ -101,10 +109,10 @@ class GoogleCharts
 		i_width = 400
 		i_height = 300
 		
+		i_scriptPath = "https://www.google.com/jsapi"
+		
 		redim i_columns(-1)
 		redim i_data(-1)
-		
-		i_scriptPath = "https://www.google.com/jsapi"
 	end sub
 	
 	sub Class_Terminate()
@@ -134,6 +142,62 @@ class GoogleCharts
 		arrayPush i_data, row
 	end sub
 	
+	public sub ClearData()
+		dim col
+		
+		for each col in i_columns
+			set col = nothing
+		next
+	
+		redim i_columns(-1)
+		redim i_data(-1)
+	end sub
+	
+	public sub LoadRecordset(byref rs)
+		if TypeName(rs) <> "Recordset" then err.raise 3, TypeName(me), "Invalid object type. Accepted type is ADODB.Recordset"
+	
+		ClearData()
+		
+		dim field, row
+		
+		for each field in rs.fields
+			AddColumn getFieldType(field.type), field.Name
+		next
+		
+		if not rs.bof then rs.moveFirst
+		
+		while not rs.eof
+			redim row(-1)
+			
+			for each field in rs.fields
+				ArrayPush row, field.value
+			next
+			
+			AddRow row
+			
+			rs.movenext
+		wend
+	end sub
+	
+	function getFieldType(byval fieldType)
+		select case fieldType
+			case 2, 3, 4, 5, 6, 7, 14, 16, 17, 18, 19, 20, 21, 131, 139
+				getFieldType = CTYPE_NUMBER
+				
+			case 11
+				getFieldType = CTYPE_BOOL
+				
+			case 64, 134, 135
+				getFieldType = CTYPE_TIME
+				
+			case 133
+				getFieldType = CTYPE_DATE
+			
+			case else
+				getFieldType = CTYPE_STRING
+		end select
+	end function
+	
 	' Pushes (adds) a value to an array, expanding it
 	private function arrayPush(byref arr, byref value)
 		redim preserve arr(ubound(arr) + 1)
@@ -155,17 +219,11 @@ class GoogleCharts
 		%>
 <script type="text/javascript"  id="GC_script_tag_<%= i_id %>">
 	if (typeof(google) == "undefined") {
-		var curLoad = window.onload;
+		var s = document.createElement("script");
+		s.src = '<%= i_scriptPath %>?callback=GC<%= i_id %>';
 		
-		window.onload = function() {
-			if (curLoad) curLoad();
-			
-			var s = document.createElement("script");
-			s.src = '<%= i_scriptPath %>?callback=GC<%= i_id %>';
-			
-			var body = document.getElementsByTagName('body')[0];
-			body.insertBefore(s, body.childNodes[0]);
-		}
+		var body = document.getElementsByTagName('body')[0];
+		body.insertBefore(s, body.childNodes[0]);
 	} else {
 		GC<%= i_id %>();
 	}
@@ -240,7 +298,7 @@ class GoogleCharts
 	};
 </script>
 <!--Div that will hold the chart-->
-<div id="chart_div_<%= i_id %>"></div>	
+<div id="chart_div_<%= i_id %>" class="GoogleChart"></div>	
 <%
 		Session.LCID = curLCID
 	end sub

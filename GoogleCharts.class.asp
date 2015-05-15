@@ -1,5 +1,5 @@
 <%
-' GoogleChart utility class 0.1 - May, 11th - 2015
+' GoogleChart utility class 1.0 - May, 14th - 2015
 '
 ' Licence:
 ' The MIT License (MIT)

@@ -1,5 +1,9 @@
-# ASP GoogleCharts
+# ASP GoogleCharts v1.0
+
 A classic ASP wrapper for the Google Charts JS API
+
+Generate charts with Google Charts API in an easy way.
+
 
 Simple to use:
 

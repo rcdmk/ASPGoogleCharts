@@ -36,7 +36,7 @@ const CTYPE_TIME		= "timeofday"
 
 class GoogleCharts
 	dim i_type, i_title, i_subtitle, i_id, i_width, i_height
-	dim i_columns, i_data, i_scriptPath
+	dim i_columns, i_data, i_scriptPath, i_loadingText
 	
 	public property get [Type]()
 		[Type] = i_type
@@ -99,6 +99,14 @@ class GoogleCharts
 		i_scriptPath = value
 	end property
 	
+	public property get LoadingText()
+		LoadingText = i_loadingText
+	end property
+	
+	public property let LoadingText(byval value)
+		i_loadingText = value
+	end property
+	
 	
 	sub Class_Initialize()
 		i_type = CT_BAR
@@ -106,6 +114,7 @@ class GoogleCharts
 		i_id = int(rnd() * timer)
 		i_title = "Google Chart " & i_id
 		i_subtitle = ""
+		i_loadingText = "Loading..."
 		i_width = 400
 		i_height = 300
 		
@@ -242,7 +251,8 @@ class GoogleCharts
 		
 		on error resume next
 		while err.number = 0
-			dimensions = ubound(arr, dimensions + 1) + 1
+			dimensions = dimensions + 1
+			ubound arr, dimensions
 		wend
 		on error goto 0
 		
@@ -335,7 +345,7 @@ class GoogleCharts
 	};
 </script>
 <!--Div that will hold the chart-->
-<div id="chart_div_<%= i_id %>" class="GoogleChart"></div>	
+<div id="chart_div_<%= i_id %>" class="GoogleChart"><%= i_loadingText %></div>	
 <%
 		Session.LCID = curLCID
 	end sub
